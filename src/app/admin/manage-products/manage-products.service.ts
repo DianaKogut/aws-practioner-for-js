@@ -3,6 +3,8 @@ import { EMPTY, Observable } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { switchMap } from 'rxjs/operators';
 
+const authorizationToken = 'authorization_token';
+
 @Injectable()
 export class ManageProductsService extends ApiService {
   constructor(injector: Injector) {
@@ -31,11 +33,18 @@ export class ManageProductsService extends ApiService {
 
   private getPreSignedUrl(fileName: string): Observable<string> {
     const url = this.getUrl('import', 'import');
+    const token = localStorage.getItem(authorizationToken);
 
     return this.http.get<string>(url, {
       params: {
         name: fileName,
       },
+      ...(token && {
+        headers: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          Authorization: `Basic ${token}`,
+        },
+      }),
     });
   }
 }
